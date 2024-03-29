@@ -1,0 +1,9 @@
+[package]
+name = "make_short_url"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+redis = "0.25.2"
+reqwest = { version = "0.12.2", features = ["blocking"] }
+url = "2.5.0"
