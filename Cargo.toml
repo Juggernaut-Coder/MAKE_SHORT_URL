@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-redis = "0.25.2"
-reqwest = { version = "0.12.2", features = ["blocking"] }
-url = "2.5.0"
+actix-files = "0.6.5"
+actix-web = "4.5.1"
+bb8-redis = "0.15.0"
+chrono = "0.4.37"
+reqwest = "0.12.2"
+serde = { version = "1.0.197", features = ["derive"] }
+
+[[bin]]
+name = "myUrlShortener"
+path = "src/main.rs"
