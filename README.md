@@ -1,6 +1,8 @@
 # MAKE_SHORT_URL
+
 ## Description:
 MAKE_SHORT_URL is a web application that enables users to create short URLs, similar to services like TinyURL. It employs actix_web for its server backend, utilizing redis as its database, and is designed to run within a Docker container environment.
+
 ##Source Files:
 1) base62.rs: Contains code to convert a numerical value into a short string using base62 encoding.
 2) redis_conn.rs: This source files defines contants and functions for interacting with a redis database. The constants includes name of the data/datastructure. The functions includes functions for setting up redis connection, flushing the database and handling expiration events using Redis' pub/sub feature. It uses actix_web for web server functionalities, bb8_redis for Redis connection pooling, and employs async/await for asynchronous operation.
@@ -10,6 +12,7 @@ MAKE_SHORT_URL is a web application that enables users to create short URLs, sim
 1) handle_button.js: This JavaScript file adds an event listener to the form identified by 'urlForm' on the webpage and handles shorten button click. When the form is submitted, it sends a POST request to the server at the '/shorten' endpoint with the URL to be shortened. The server response is then displayed to the user: if successful, it shows the shortened URL as a clickable link; otherwise, it displays an error message.  
 2) home.html: Contains html code for the home page of the web application
 3) style.css: Contains CSS code for the homepage
+
 ##Intial Step to compile and run this demo:
 **Warning**: Ensure your local host is not mapped to anything or `us.ex` is not already mapped in your `hosts` file to avoid conflicts. Also, ensure you can safely map your local host
 Open a terminal and run the following command to map `localhost` to `us.ex`:
