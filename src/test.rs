@@ -1,5 +1,5 @@
 use super::*;
-use std::{fmt::format, time::Duration};
+use std::time::Duration;
 use env_logger::Builder;
 use futures::StreamExt;
 use bb8_redis::redis::{Client, cmd};
@@ -9,6 +9,7 @@ use redis_conn::redis_url;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
+// run test one by one in order in sync
 lazy_static! {
     static ref TEST_MUTEX: Mutex<()> = Mutex::new(());
 }
@@ -83,7 +84,6 @@ async fn test_process_url() {
     info!("Body: {}", String::from_utf8_lossy(&body));
     assert!(status.is_success(), "Expected success status, got {}. Body: {}", status, String::from_utf8_lossy(&body));
 }
-
 
 #[actix_web::test]
 async fn test_url_redirection() {
