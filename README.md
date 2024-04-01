@@ -16,10 +16,21 @@ MAKE_SHORT_URL is a web application for creating short URLs, similar to TinyURL,
 
 ### Setup
 1. **Localhost Mapping**: Ensure no conflicts in `/etc/hosts` (Unix) or `C:\Windows\System32\drivers\etc\hosts` (Windows) and map `us.ex` to `127.0.0.1`.
-2. **Docker**: Install Docker ([Get Started with Docker](https://www.docker.com/get-started/)).
+   - For Unix-based systems (Linux/macOS):
+     ```bash
+     sudo bash -c 'echo "127.0.0.1 us.ex" >> /etc/hosts'
+     ```
+   - For Windows:
+     ```powershell
+     Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "127.0.0.1 us.ex"
+     ```
+2. **Docker Installation**: [Get Started with Docker](https://www.docker.com/get-started/).
 3. **Clone and Run**:
    ```bash
    git clone https://github.com/DirtyVoid/MAKE_SHORT_URL.git
    cd MAKE_SHORT_URL
    docker build --no-cache -t my-url-shortener .
    docker run -p 80:80 my-url-shortener
+   ```
+### Usage
+Access http://us.ex in a browser to shorten URLs. Adjust TTL in redis_conn.rs to change URL expiration.
