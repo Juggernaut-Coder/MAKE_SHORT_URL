@@ -138,5 +138,5 @@ async fn test_encode() {
     let x = encode(large_number).await;
     let expected_large_number = "111";
     assert_eq!(x, expected_large_number, "Encoding a large number should return the correct base 62 representation");
-    info!("Passed {} = {}", x, large_number);
+    info!("Passed {} = {}", x, expected_large_number);
 }

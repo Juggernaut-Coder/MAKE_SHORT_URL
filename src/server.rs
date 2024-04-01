@@ -13,6 +13,8 @@ pub use actix_web::{web, rt, App, HttpResponse, HttpServer, middleware::Logger};
 pub use actix_files::{NamedFile, Files};
 pub use bb8_redis::{bb8::Pool, redis::cmd, RedisConnectionManager};
 
+const THRESHOLD: u64 = u64::MAX - 20;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UrlForm {
     url: String
@@ -71,6 +73,16 @@ pub async fn redirect_to_home() -> HttpResponse {
     return HttpResponse::Found().append_header(("Location", "/home")).finish();
 }
 
+// Lua Script to ensure redis get and incr operation happens atomically. also to checks u64 over flow;
+static GET_ID_SCRIPT: &str = r#" 
+    local current_id = redis.call('GET', KEYS[1])
+    if tonumber(current_id) > tonumber(ARGV[1]) then
+        return {false, current_id}
+    else
+        return {true, redis.call('INCR', KEYS[1])}
+    end
+"#;
+
 pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: web::Form<UrlForm>) -> HttpResponse {
     let input_url = form.url.trim();
     debug!("Received URL: {}", input_url);
@@ -92,16 +104,15 @@ pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: we
                 encoded_id = cmd("LPOP").arg(ID_LIST).query_async::<_, Option<String>>(&mut *redis_conn).await.unwrap_or(None);
                 if encoded_id.is_none() {
                     debug!("List is empty! Generating new ID");
-                    let id: u64 = cmd("GET").arg(URL_ID).query_async(&mut *redis_conn).await.unwrap();
-                    // Naive overflow check, in real world scenerio maybe incoporate UUID or other mechanism
-                    if id > u64::MAX - 5 {
+                    let result: (bool, u64) = cmd("EVAL")
+                    .arg(GET_ID_SCRIPT).arg(1).arg(URL_ID).arg(THRESHOLD.to_string())
+                    .query_async(&mut *redis_conn).await.unwrap();
+                    if !result.0 {
                         warn!("Cannot Generate a new ID! ID capacity at its maximum limit");
                         return HttpResponse::Ok().json(UrlResponse { msg: "ID at max capacity. Please Wait Until Other ids free up".to_string() });
-                    } else {
-                        debug!("Generated id:{}", id);
-                        cmd("INCR").arg(URL_ID).query_async::<_,()>(&mut *redis_conn).await.unwrap();
-                        encoded_id = Some(encode(id).await);
                     }
+                    debug!("Generated id:{}", result.1);
+                    encoded_id = Some(encode(result.1).await);
                 }
                 set = true;
             }
