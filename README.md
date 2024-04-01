@@ -6,11 +6,11 @@ MAKE_SHORT_URL is a web application for creating short URLs, similar to TinyURL,
 ### Source Files
 - `base62.rs`: Base62 encoding logic.
 - `redis_conn.rs`: Redis interaction, setup, and event handling.
-- `server.rs`: Main application entry, server setup.
+- `server.rs`: Main application entry, server setup, redis integration
 - `test.rs`: Project tests.
 
 ### Static Files
-- `handle_button.js`: Event listener for form submission and URL shortening logic.
+- `handle_button.js`: Event listener for form submission and Button click handling.
 - `home.html`: Homepage HTML.
 - `style.css`: Homepage styling.
 
