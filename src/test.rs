@@ -1,3 +1,6 @@
+#![allow(clippy::needless_return)]
+#![allow(clippy::explicit_auto_deref)]
+
 use super::*;
 use std::time::Duration;
 use env_logger::Builder;
@@ -8,7 +11,7 @@ use log::info;
 use redis_conn::redis_url;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
-
+use crate::base62::BASE;
 // run test one by one in order in sync
 lazy_static! {
     static ref TEST_MUTEX: Mutex<()> = Mutex::new(());
@@ -87,7 +90,6 @@ async fn test_process_url() {
 
 #[actix_web::test]
 async fn test_url_redirection() {
-    let _guard = TEST_MUTEX.lock().unwrap();
     let _ = Builder::new().filter_level(LevelFilter::Debug).is_test(true).try_init();
     let encoded_id = "0";
     let pool = get_redis_pool().await;
@@ -107,7 +109,7 @@ async fn test_url_redirection() {
 
 #[actix_web::test]
 async fn test_redis_pool() {
-    let _guard = TEST_MUTEX.lock().unwrap();
+    let _ = Builder::new().filter_level(LevelFilter::Debug).is_test(true).try_init();
     let pool = redis_conn::get_redis_pool().await;
     let redis_conn = pool.get().await;
     assert!(redis_conn.is_ok());
@@ -116,3 +118,25 @@ async fn test_redis_pool() {
     assert_eq!("PONG", reply);
 }
 
+
+#[actix_web::test]
+async fn test_encode() {
+    let _ = Builder::new().filter_level(LevelFilter::Debug).is_test(true).try_init();
+    let x = encode(0).await;
+    assert_eq!(x, "0", "Encoding zero should return '0'");
+    info!("Passed {} = {}", x, "0");
+    let x = encode(8).await;
+    assert_eq!(x, "8", "Encoding 1 should return '1'");
+    info!("Passed {} = {}", x, "8");
+
+    let x = encode(BASE as u64).await;
+    let expected = "10";
+    assert_eq!(x, expected, "Encoding BASE should return '10' in base 62");
+    info!("Passed {} = {}", x, expected);
+
+    let large_number: u64 = BASE * BASE + BASE + 1;
+    let x = encode(large_number).await;
+    let expected_large_number = "111";
+    assert_eq!(x, expected_large_number, "Encoding a large number should return the correct base 62 representation");
+    info!("Passed {} = {}", x, large_number);
+}

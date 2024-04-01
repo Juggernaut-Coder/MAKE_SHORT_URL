@@ -1,3 +1,6 @@
+#![allow(clippy::needless_return)]
+#![allow(clippy::explicit_auto_deref)]
+
 #[cfg(debug_assertions)]
 pub const TTL: i64 = 60;
 #[cfg(not(debug_assertions))]
@@ -30,7 +33,7 @@ pub async fn setup_redis(redis_conn: &mut aio::MultiplexedConnection) {
     let exists_id_list: i32 = cmd("EXISTS").arg(ID_LIST).query_async(redis_conn).await.unwrap();
     if exists_id_list != 1 { cmd("LPUSH").arg(ID_LIST).arg("i0").query_async::<_,()>(redis_conn).await.unwrap(); }
     let config: Vec<(String, String)> = cmd("CONFIG").arg("GET").arg("notify-keyspace-events").query_async(redis_conn).await.unwrap();
-    if let Some((key, val)) = config.get(0) {
+    if let Some((key, val)) = config.first() {
         debug!("{}: {}", key, val);
         if !val.contains('E') || !val.contains('x') {
             cmd("CONFIG").arg("SET").arg("notify-keyspace-events").arg("Ex").query_async::<_,()>(redis_conn).await.unwrap();

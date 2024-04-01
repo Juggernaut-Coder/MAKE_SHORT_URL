@@ -1,5 +1,8 @@
-const BASE: u64 = 62;
-const ALPHABET: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+#![allow(clippy::needless_return)]
+#![allow(clippy::explicit_auto_deref)]
+
+pub const BASE: u64 = 62;
+pub const ALPHABET: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 pub async fn encode(mut num: u64) -> String {
     if num == 0 {
@@ -13,3 +16,4 @@ pub async fn encode(mut num: u64) -> String {
     }
     return result_str.chars().rev().collect();
 }
+

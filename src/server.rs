@@ -1,10 +1,12 @@
 #![allow(non_snake_case)]
+#![allow(clippy::needless_return)]
+#![allow(clippy::explicit_auto_deref)]
 
-mod base62;
-use base62::encode;
+pub mod base62;
+pub use base62::encode;
 pub use redis_conn::{TTL, ID_LIST, URL_ID, redis_psub_expiry, get_redis_pool, setup_redis, redis_flush_db};
 pub use env_logger::Builder;
-pub use log::{LevelFilter, debug};
+pub use log::{LevelFilter, debug, warn};
 pub use serde::{Deserialize, Serialize};
 pub use reqwest::Url;
 pub use actix_web::{web, rt, App, HttpResponse, HttpServer, middleware::Logger};
@@ -73,10 +75,10 @@ pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: we
     let input_url = form.url.trim();
     debug!("Received URL: {}", input_url);
     let mut response = "Invalid URL format! Try again".to_string();
-    let rqst_url = Url::parse(&input_url);
+    let rqst_url = Url::parse(input_url);
     if rqst_url.is_ok() {
         let ping_result = reqwest::get(rqst_url.unwrap()).await;
-        if let Ok(_) = ping_result {
+        if ping_result.is_ok() {
             debug!("URL is valid");
             let mut redis_conn = pool.get().await.unwrap();
             let mut set: bool = false;
@@ -91,9 +93,15 @@ pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: we
                 if encoded_id.is_none() {
                     debug!("List is empty! Generating new ID");
                     let id: u64 = cmd("GET").arg(URL_ID).query_async(&mut *redis_conn).await.unwrap();
-                    debug!("Generated id:{}", id);
-                    cmd("INCR").arg(URL_ID).query_async::<_,()>(&mut *redis_conn).await.unwrap();
-                    encoded_id = Some(encode(id).await);
+                    // Naive overflow check, in real world scenerio maybe incoporate UUID or other mechanism
+                    if id > u64::MAX - 5 {
+                        warn!("Cannot Generate a new ID! ID capacity at its maximum limit");
+                        return HttpResponse::Ok().json(UrlResponse { msg: "ID at max capacity. Please Wait Until Other ids free up".to_string() });
+                    } else {
+                        debug!("Generated id:{}", id);
+                        cmd("INCR").arg(URL_ID).query_async::<_,()>(&mut *redis_conn).await.unwrap();
+                        encoded_id = Some(encode(id).await);
+                    }
                 }
                 set = true;
             }
@@ -107,8 +115,7 @@ pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: we
             response = format!("http://us.ex/{}", encoded_id);
         } else { response = "URL not reachable! Try again".to_string(); }
     }
-    let serialied_response = UrlResponse { msg: response };
-    return HttpResponse::Ok().json(serialied_response);
+    return HttpResponse::Ok().json(UrlResponse { msg: response });
 }
 
 pub async fn short_url_redirect(pool: web::Data<Pool<RedisConnectionManager>>, short_url: web::Path<String>) -> HttpResponse { 
