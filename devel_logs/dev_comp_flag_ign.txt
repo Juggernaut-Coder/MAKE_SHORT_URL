@@ -1,3 +1,4 @@
+Must need flag to stop rust analyzer driving you crazy, you can remove them once initial development process is done:
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 #![allow(unused_imports)]

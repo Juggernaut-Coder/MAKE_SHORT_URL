@@ -107,6 +107,7 @@ async fn test_url_redirection() {
 
 #[actix_web::test]
 async fn test_redis_pool() {
+    let _guard = TEST_MUTEX.lock().unwrap();
     let pool = redis_conn::get_redis_pool().await;
     let redis_conn = pool.get().await;
     assert!(redis_conn.is_ok());

@@ -14,11 +14,11 @@ function handle_button_click(event) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.url) {
-            const resultElement = document.getElementById('result');
-            resultElement.innerHTML = `<a href="${data.url}" target="_blank">${data.msg}</a>`; 
+        const resultElement = document.getElementById('result');
+        if (data.msg.startsWith('http://us.ex/')) {
+            resultElement.innerHTML = `<a href="${data.msg}" target="_blank">${data.msg}</a>`;
         } else {
-            document.getElementById('result').textContent = data.msg;
+            resultElement.textContent = data.msg;
         }
     })
     .catch(err => {

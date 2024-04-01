@@ -1,10 +1,7 @@
 #![allow(non_snake_case)]
-#![allow(unused_assignments)]
-#![allow(dead_code)]
-#![allow(unused_imports)]
 
 mod base62;
-use base62::prefix_encode;
+use base62::encode;
 pub use redis_conn::{TTL, ID_LIST, URL_ID, redis_psub_expiry, get_redis_pool, setup_redis, redis_flush_db};
 pub use env_logger::Builder;
 pub use log::{LevelFilter, debug};
@@ -75,7 +72,7 @@ pub async fn redirect_to_home() -> HttpResponse {
 pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: web::Form<UrlForm>) -> HttpResponse {
     let input_url = form.url.trim();
     debug!("Received URL: {}", input_url);
-    let mut response = String::new();
+    let mut response = "Invalid URL format! Try again".to_string();
     let rqst_url = Url::parse(&input_url);
     if rqst_url.is_ok() {
         let ping_result = reqwest::get(rqst_url.unwrap()).await;
@@ -96,7 +93,7 @@ pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: we
                     let id: u64 = cmd("GET").arg(URL_ID).query_async(&mut *redis_conn).await.unwrap();
                     debug!("Generated id:{}", id);
                     cmd("INCR").arg(URL_ID).query_async::<_,()>(&mut *redis_conn).await.unwrap();
-                    encoded_id = Some(prefix_encode(id).await);
+                    encoded_id = Some(encode(id).await);
                 }
                 set = true;
             }
@@ -109,7 +106,7 @@ pub async fn process_url(pool: web::Data<Pool<RedisConnectionManager>>, form: we
             }
             response = format!("http://us.ex/{}", encoded_id);
         } else { response = "URL not reachable! Try again".to_string(); }
-    } else { response = "Invalid URL format! Try again".to_string(); }
+    }
     let serialied_response = UrlResponse { msg: response };
     return HttpResponse::Ok().json(serialied_response);
 }
