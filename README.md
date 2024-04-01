@@ -25,7 +25,7 @@ MAKE_SHORT_URL is a web application for creating short URLs, similar to TinyURL,
      Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "127.0.0.1 us.ex"
      ```
 2. **Docker Installation**: [Get Started with Docker](https://www.docker.com/get-started/).
-3. **Clone and Run**:
+3. **Clone repo and Run**:
    ```bash
    git clone https://github.com/DirtyVoid/MAKE_SHORT_URL.git
    cd MAKE_SHORT_URL
