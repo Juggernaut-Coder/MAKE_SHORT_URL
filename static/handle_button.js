@@ -14,7 +14,12 @@ function handle_button_click(event) {
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('result').textContent = data.msg; // Ensure the key 'msg' matches the response
+        if (data.url) {
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = `<a href="${data.url}" target="_blank">${data.msg}</a>`; 
+        } else {
+            document.getElementById('result').textContent = data.msg;
+        }
     })
     .catch(err => {
         console.error('Error:', err);
