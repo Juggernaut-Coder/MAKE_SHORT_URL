@@ -1,0 +1,7 @@
+This error happens when you have gcc in your path evn var 
+
+windows:
+setx RUSTFLAGS "-C linker=C:\Users\dirtyvoid\.rustup\toolchains\stable-x86_64-pc-windows-gnu\lib\rustlib\x86_64-pc-windows-gnu\bin\self-contained\ld.exe"
+
+linux:
+export RUSTFLAGS="-C linker=pathto/bin/self-contained/ld.exe"
