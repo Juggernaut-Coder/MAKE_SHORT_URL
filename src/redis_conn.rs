@@ -16,8 +16,8 @@ use log::debug;
 
 //Under normal circumstances api keys should never be exposed like this!
 const END_POINT: &str = "redis-13989.c329.us-east4-1.gce.cloud.redislabs.com:13989";
-const USR: &str = "Syed";
-const PASS: &str = "Uncertainty320@@";
+const USR: &str = "Dirty";
+const PASS: &str = "SuperStrong320@@";
 
 pub fn redis_url() -> String {
     return format!("redis://{}:{}@{}", USR, PASS, END_POINT);
