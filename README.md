@@ -34,3 +34,4 @@ MAKE_SHORT_URL is a web application for creating short URLs, similar to TinyURL,
    ```
 ### Usage
 Access http://us.ex in a browser to shorten URLs. Adjust TTL in redis_conn.rs to change URL expiration.
+At the moment untested on Unix
